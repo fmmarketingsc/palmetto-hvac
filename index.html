@@ -454,51 +454,51 @@
 <section class="py-24 bg-slate-900 overflow-hidden relative">
   <div class="max-w-7xl mx-auto px-6">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-      <!-- Phone Mockup -->
+
+      <!-- Live Chat Widget -->
       <div class="relative order-2 md:order-1 flex justify-center">
-        <div class="relative w-72 h-[580px] bg-black rounded-[3rem] border-8 border-slate-800 shadow-2xl overflow-hidden">
-          <div class="absolute top-0 w-full h-6 bg-slate-800 flex justify-center items-end pb-1">
-            <div class="w-16 h-1 bg-slate-700 rounded-full"></div>
+        <div class="relative w-full max-w-sm bg-black rounded-[2rem] border-4 border-slate-800 shadow-2xl overflow-hidden flex flex-col" style="height:560px">
+          <!-- Chat Header -->
+          <div class="bg-primary-container px-5 py-4 flex items-center gap-3 flex-shrink-0">
+            <div class="w-9 h-9 rounded-full bg-secondary-container flex items-center justify-center flex-shrink-0">
+              <span class="material-symbols-outlined text-white text-base">smart_toy</span>
+            </div>
+            <div>
+              <div class="text-white text-sm font-bold">Lowcountry AI Support</div>
+              <div class="text-emerald-400 text-[10px] font-bold">● Active Now — 24/7</div>
+            </div>
           </div>
-          <div class="pt-8 h-full bg-slate-950 flex flex-col">
-            <!-- Chat header -->
-            <div class="bg-primary-container px-4 py-3 flex items-center gap-3">
-              <div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center">
-                <span class="material-symbols-outlined text-white text-sm">smart_toy</span>
-              </div>
-              <div>
-                <div class="text-white text-xs font-bold">Lowcountry AI Support</div>
-                <div class="text-emerald-400 text-[9px] font-bold">● Active Now</div>
-              </div>
+
+          <!-- Messages -->
+          <div class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50" id="chat-messages">
+            <div class="chat-bubble-ai bg-slate-200 text-slate-900 text-xs p-3 rounded-2xl rounded-tl-none max-w-[82%] leading-relaxed">
+              Hey! I'm the Lowcountry AI assistant. Describe your AC or heating issue and I'll give you an instant estimate and help get a tech scheduled. 🌡️
             </div>
-            <!-- Chat messages -->
-            <div class="flex-1 p-4 space-y-4 bg-slate-50">
-              <div class="bg-slate-200 text-slate-900 text-[10px] p-3 rounded-2xl rounded-tl-none max-w-[82%] leading-relaxed">
-                Hello! My AC is blowing warm air. Can I get a quote?
-              </div>
-              <div class="bg-secondary-container text-white text-[10px] p-3 rounded-2xl rounded-tr-none max-w-[82%] ml-auto leading-relaxed shadow-lg">
-                I can help with that. Based on your local temp of 98°F, I've prioritized your request. Can you confirm your zip code?
-              </div>
-              <div class="bg-slate-200 text-slate-900 text-[10px] p-3 rounded-2xl rounded-tl-none max-w-[82%] leading-relaxed">
-                29483 — Summerville
-              </div>
-              <div class="bg-secondary-container text-white text-[10px] p-3 rounded-2xl rounded-tr-none max-w-[82%] ml-auto leading-relaxed shadow-lg">
-                Got it. I can have a tech at your door by 2PM today. Would you like a price estimate first?
-              </div>
+          </div>
+
+          <!-- Typing indicator (hidden by default) -->
+          <div class="px-4 pb-1 hidden" id="chat-typing">
+            <div class="bg-slate-200 text-slate-500 text-[10px] px-4 py-2 rounded-full inline-flex items-center gap-2">
+              <span class="animate-bounce">●</span><span class="animate-bounce" style="animation-delay:.15s">●</span><span class="animate-bounce" style="animation-delay:.3s">●</span>
             </div>
-            <!-- Chat input -->
-            <div class="p-3 bg-slate-950 flex items-center gap-2 border-t border-slate-800">
-              <div class="flex-1 bg-slate-900 border border-slate-800 rounded-full py-2 px-4">
-                <span class="text-slate-600 text-[10px]">Type message...</span>
-              </div>
-              <div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center flex-shrink-0">
-                <span class="material-symbols-outlined text-white text-sm">send</span>
-              </div>
-            </div>
+          </div>
+
+          <!-- Input -->
+          <div class="p-3 bg-slate-950 flex items-center gap-2 border-t border-slate-800 flex-shrink-0">
+            <input
+              id="chat-input"
+              type="text"
+              placeholder="Describe your issue..."
+              class="flex-1 bg-slate-900 border border-slate-700 rounded-full py-2.5 px-4 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-secondary-container"
+              onkeydown="if(event.key==='Enter') sendChat()"
+            />
+            <button onclick="sendChat()" class="w-9 h-9 rounded-full bg-secondary-container flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform active:scale-95">
+              <span class="material-symbols-outlined text-white text-sm">send</span>
+            </button>
           </div>
         </div>
         <!-- Ambient glow -->
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-orange-600/10 rounded-full blur-[100px] -z-10"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-orange-600/10 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
       </div>
 
       <!-- Content -->
@@ -514,19 +514,19 @@
         <ul class="space-y-4 mb-10">
           <li class="flex items-center gap-4 text-white">
             <span class="material-symbols-outlined text-secondary-container flex-shrink-0" style="font-variation-settings:'FILL' 1;">check_circle</span>
-            <span class="font-bold tracking-tight">Instant Estimations</span>
+            <span class="font-bold tracking-tight">Instant Price Estimations</span>
           </li>
           <li class="flex items-center gap-4 text-white">
             <span class="material-symbols-outlined text-secondary-container flex-shrink-0" style="font-variation-settings:'FILL' 1;">check_circle</span>
-            <span class="font-bold tracking-tight">Real-time Technician Tracking</span>
+            <span class="font-bold tracking-tight">Diagnose Common Issues</span>
           </li>
           <li class="flex items-center gap-4 text-white">
             <span class="material-symbols-outlined text-secondary-container flex-shrink-0" style="font-variation-settings:'FILL' 1;">check_circle</span>
-            <span class="font-bold tracking-tight">Direct Emergency Dispatch</span>
+            <span class="font-bold tracking-tight">Schedule a Tech Directly</span>
           </li>
         </ul>
-        <button class="bg-white text-slate-950 px-10 py-4 rounded-xl font-black text-sm uppercase tracking-widest hover:bg-secondary-container hover:text-white transition-all">
-          LAUNCH CHAT
+        <button onclick="document.getElementById('chat-input').focus(); document.getElementById('chat-input').scrollIntoView({behavior:'smooth'})" class="bg-white text-slate-950 px-10 py-4 rounded-xl font-black text-sm uppercase tracking-widest hover:bg-secondary-container hover:text-white transition-all">
+          START CHAT
         </button>
       </div>
     </div>
@@ -696,10 +696,10 @@
 
 <!-- ═══════════════════════════════════════════ SCRIPTS ═══ -->
 <script>
-  // Mobile menu toggle
+  // ── Mobile menu ──────────────────────────────────────────
   const menuToggle = document.getElementById('menu-toggle');
   const mobileMenu = document.getElementById('mobile-menu');
-  const menuIcon = document.getElementById('menu-icon');
+  const menuIcon   = document.getElementById('menu-icon');
 
   menuToggle.addEventListener('click', () => {
     mobileMenu.classList.toggle('open');
@@ -711,26 +711,107 @@
     menuIcon.textContent = 'menu';
   }
 
-  // Form submission handler
-  function handleSubmit(e) {
-    e.preventDefault();
-    const btn = e.target.querySelector('button[type="submit"]');
-    btn.textContent = '✓ REQUEST SENT — WE\'LL CALL YOU SHORTLY';
-    btn.classList.remove('kinetic-gradient');
-    btn.classList.add('bg-emerald-600');
-    btn.disabled = true;
-  }
-
-  // Scroll: shrink header slightly
+  // ── Scroll: shrink header ─────────────────────────────────
   const header = document.getElementById('header');
   window.addEventListener('scroll', () => {
-    if (window.scrollY > 80) {
-      header.classList.add('py-2');
-      header.classList.remove('py-0');
-    } else {
-      header.classList.remove('py-2');
-    }
+    header.classList.toggle('py-2', window.scrollY > 80);
   }, { passive: true });
+
+  // ── Contact form → /api/contact ───────────────────────────
+  async function handleSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const btn  = form.querySelector('button[type="submit"]');
+    const inputs = form.querySelectorAll('input, select, textarea');
+
+    btn.textContent = 'SENDING…';
+    btn.disabled = true;
+
+    const fields = form.querySelectorAll('input, select, textarea');
+    const [nameEl, phoneEl, emailEl, serviceEl, addressEl, systemEl, messageEl] = fields;
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name:       nameEl?.value,
+          phone:      phoneEl?.value,
+          email:      emailEl?.value,
+          service:    serviceEl?.value,
+          address:    addressEl?.value,
+          systemType: systemEl?.value,
+          message:    messageEl?.value,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        btn.textContent = '✓ REQUEST SENT!';
+        btn.classList.remove('kinetic-gradient');
+        btn.classList.add('bg-emerald-600');
+
+        // Show AI-personalised confirmation below the button
+        const confirm = document.createElement('p');
+        confirm.className = 'mt-4 text-sm text-emerald-700 bg-emerald-50 rounded-xl p-4 leading-relaxed';
+        confirm.textContent = data.message;
+        btn.parentElement.appendChild(confirm);
+      } else {
+        throw new Error(data.error || 'Unknown error');
+      }
+    } catch (err) {
+      btn.textContent = 'ERROR — PLEASE CALL US';
+      btn.classList.remove('kinetic-gradient');
+      btn.classList.add('bg-red-600');
+      btn.disabled = false;
+      console.error('Contact form error:', err);
+    }
+  }
+
+  // ── AI Chat → /api/chat ───────────────────────────────────
+  const chatHistory = [];
+
+  function appendMessage(text, isUser) {
+    const box = document.getElementById('chat-messages');
+    const div = document.createElement('div');
+    div.className = isUser
+      ? 'bg-secondary-container text-white text-xs p-3 rounded-2xl rounded-tr-none max-w-[82%] ml-auto leading-relaxed shadow-lg'
+      : 'bg-slate-200 text-slate-900 text-xs p-3 rounded-2xl rounded-tl-none max-w-[82%] leading-relaxed';
+    div.textContent = text;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  async function sendChat() {
+    const input = document.getElementById('chat-input');
+    const text  = input.value.trim();
+    if (!text) return;
+
+    input.value = '';
+    appendMessage(text, true);
+    chatHistory.push({ role: 'user', content: text });
+
+    const typing = document.getElementById('chat-typing');
+    typing.classList.remove('hidden');
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: chatHistory }),
+      });
+
+      const data = await res.json();
+      const reply = data.reply || "Sorry, I'm having trouble right now. Please call (843) 555-0123.";
+      chatHistory.push({ role: 'assistant', content: reply });
+      appendMessage(reply, false);
+    } catch (err) {
+      appendMessage("Connection error. Please call us at (843) 555-0123 — we're available 24/7.", false);
+    } finally {
+      typing.classList.add('hidden');
+    }
+  }
 </script>
 </body>
 </html>
