@@ -8,6 +8,7 @@
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@700;800;900&family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script id="tailwind-config">
   tailwind.config = {
     darkMode: "class",
@@ -206,6 +207,25 @@
     Summer Special — Free AC Tune-Up With Any Repair — Limited Spots Available
   </p>
 </div>
+
+<!-- ═══════════════════════════════════════════ SERVICE AREA MAP ═══ -->
+<section class="bg-primary-container py-16" id="service-area">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
+      <div>
+        <span class="text-secondary-container font-black uppercase tracking-[0.3em] text-xs block mb-2">Coverage Zone</span>
+        <h2 class="font-headline text-4xl md:text-5xl font-black text-white uppercase tracking-tighter leading-none">Service Area</h2>
+      </div>
+      <p class="text-slate-400 font-medium text-sm max-w-sm">Click any zone to see details. We cover the entire Lowcountry region of South Carolina.</p>
+    </div>
+
+    <!-- Map container -->
+    <div class="rounded-2xl overflow-hidden shadow-2xl shadow-black/40 border border-white/5" style="height:480px" id="service-map"></div>
+
+    <!-- Zone chips below map -->
+    <div class="flex flex-wrap gap-2 mt-5" id="zone-chips"></div>
+  </div>
+</section>
 
 <!-- ═══════════════════════════════════════════ CONTACT FORM ═══ -->
 <section class="py-24 bg-surface-container" id="contact">
@@ -694,6 +714,9 @@
   </a>
 </div>
 
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <!-- ═══════════════════════════════════════════ SCRIPTS ═══ -->
 <script>
   // ── Mobile menu ──────────────────────────────────────────
@@ -782,6 +805,140 @@
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
   }
+
+  // ── Service Area Map ─────────────────────────────────────
+  const SERVICE_ZONES = [
+    {
+      name: 'Charleston',
+      lat: 32.7765, lng: -79.9311,
+      radius: 8500,
+      desc: 'Downtown & Historic District',
+      emergency: true,
+    },
+    {
+      name: 'North Charleston',
+      lat: 32.8546, lng: -79.9748,
+      radius: 7500,
+      desc: 'Airport Corridor & Northwoods',
+      emergency: true,
+    },
+    {
+      name: 'Summerville',
+      lat: 33.0185, lng: -80.1759,
+      radius: 9000,
+      desc: 'Flowertown & Knightsville',
+      emergency: true,
+    },
+    {
+      name: 'Goose Creek',
+      lat: 32.9810, lng: -80.0326,
+      radius: 7000,
+      desc: 'Crowfield & Sangaree',
+      emergency: false,
+    },
+    {
+      name: 'Mt. Pleasant',
+      lat: 32.8323, lng: -79.8284,
+      radius: 8000,
+      desc: 'East of the Cooper River',
+      emergency: false,
+    },
+    {
+      name: 'James Island',
+      lat: 32.7343, lng: -79.9838,
+      radius: 5500,
+      desc: 'West of Downtown Charleston',
+      emergency: false,
+    },
+    {
+      name: 'Daniel Island',
+      lat: 32.8579, lng: -79.9011,
+      radius: 4500,
+      desc: 'Cainhoy Peninsula',
+      emergency: false,
+    },
+    {
+      name: 'Moncks Corner',
+      lat: 33.1968, lng: -80.0117,
+      radius: 7000,
+      desc: 'Berkeley County Seat',
+      emergency: false,
+    },
+  ];
+
+  const ORANGE      = '#fe6a2a';
+  const ORANGE_DARK = '#a83900';
+  const NAVY        = '#101c2e';
+
+  // Init map centred on the Lowcountry
+  const map = L.map('service-map', {
+    center: [32.92, -80.02],
+    zoom: 10,
+    zoomControl: true,
+    scrollWheelZoom: false,
+    attributionControl: true,
+  });
+
+  // Dark CartoDB tiles — no API key needed
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://carto.com/">CARTO</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
+    subdomains: 'abcd',
+    maxZoom: 19,
+  }).addTo(map);
+
+  // Build chip container
+  const chipContainer = document.getElementById('zone-chips');
+
+  SERVICE_ZONES.forEach((zone) => {
+    // Circle overlay
+    const circle = L.circle([zone.lat, zone.lng], {
+      radius: zone.radius,
+      color: ORANGE,
+      weight: 2,
+      opacity: 0.9,
+      fillColor: ORANGE,
+      fillOpacity: 0.18,
+    }).addTo(map);
+
+    // Popup
+    circle.bindPopup(`
+      <div style="font-family:Inter,sans-serif;min-width:160px">
+        <div style="font-weight:900;font-size:14px;text-transform:uppercase;letter-spacing:.05em;color:${NAVY};margin-bottom:4px">${zone.name}</div>
+        <div style="font-size:11px;color:#666;margin-bottom:6px">${zone.desc}</div>
+        ${zone.emergency ? `<span style="background:${ORANGE};color:#fff;font-size:9px;font-weight:900;padding:2px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.1em">24/7 Emergency</span>` : `<span style="background:#e7eeff;color:#101c2e;font-size:9px;font-weight:900;padding:2px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.1em">Same Day Service</span>`}
+        <div style="margin-top:10px"><a href="#contact" style="font-size:10px;font-weight:900;color:${ORANGE_DARK};text-transform:uppercase;letter-spacing:.1em">Book Service →</a></div>
+      </div>
+    `, { className: 'sentinel-popup' });
+
+    // Hover highlight
+    circle.on('mouseover', () => circle.setStyle({ fillOpacity: 0.38, weight: 3 }));
+    circle.on('mouseout',  () => circle.setStyle({ fillOpacity: 0.18, weight: 2 }));
+
+    // Chip below map
+    const chip = document.createElement('button');
+    chip.className = 'flex items-center gap-1.5 bg-slate-800 hover:bg-secondary-container text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full transition-colors';
+    chip.innerHTML = `<span style="width:6px;height:6px;border-radius:50%;background:${ORANGE};display:inline-block;flex-shrink:0"></span>${zone.name}`;
+    chip.addEventListener('click', () => {
+      map.flyTo([zone.lat, zone.lng], 12, { duration: 0.8 });
+      circle.openPopup();
+    });
+    chipContainer.appendChild(chip);
+  });
+
+  // Custom popup style injected once
+  const popupStyle = document.createElement('style');
+  popupStyle.textContent = `
+    .sentinel-popup .leaflet-popup-content-wrapper {
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.2);
+      border: 1px solid #e7eeff;
+      padding: 0;
+    }
+    .sentinel-popup .leaflet-popup-content { margin: 14px 16px; }
+    .sentinel-popup .leaflet-popup-tip { background: #fff; }
+    .leaflet-control-attribution { font-size: 9px !important; }
+  `;
+  document.head.appendChild(popupStyle);
 
   async function sendChat() {
     const input = document.getElementById('chat-input');
