@@ -46,7 +46,7 @@ Customer: ${name}, Phone: ${phone}, System: ${systemType || 'unknown'}, Issue: "
         interruption_threshold: 150,
         temperature: 0.7,
         max_duration: 4,
-        webhook: `${process.env.VERCEL_URL || 'https://palmetto-hvac.vercel.app'}/api/call-complete`,
+        webhook: `https://palmetto-hvac.vercel.app/api/call-complete`,
         metadata: { leadId, name, phone, service },
         request_data: { leadId, name, service },
       }),
