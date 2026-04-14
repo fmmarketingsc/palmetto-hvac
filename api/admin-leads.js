@@ -13,7 +13,7 @@ module.exports = async function handler(req, res) {
   try {
     const serviceKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY;
     const response = await fetch(
-      `${process.env.SUPABASE_URL}/rest/v1/leads?order=created_at.desc&limit=200`,
+      `${process.env.SUPABASE_URL}/rest/v1/leads?order=created_at.desc&limit=200&select=*`,
       {
         headers: {
           'apikey': serviceKey,

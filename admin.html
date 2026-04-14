@@ -6,336 +6,415 @@
   <title>Lowcountry Air — Admin</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { background: #0b1320; font-family: 'Inter', sans-serif; }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #0b1320; }
-    ::-webkit-scrollbar-thumb { background: #2a3550; border-radius: 3px; }
-    .status-new       { background:#1e3a5f;  color:#60a5fa; }
-    .status-call_initiated { background:#1a3a2a; color:#4ade80; }
-    .status-call_completed { background:#1a3a2a; color:#34d399; }
-    .status-call_missed    { background:#3b1a1a; color:#f87171; }
-    .status-booked         { background:#1a2f3a; color:#38bdf8; }
-    .fade-in { animation: fadeIn .3s ease; }
-    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
-    input::placeholder { color:#4b5563; }
+    * { box-sizing: border-box; }
+    body { background:#0b1320; font-family:'Inter',sans-serif; color:#fff; }
+    ::-webkit-scrollbar { width:5px; height:5px; }
+    ::-webkit-scrollbar-track { background:#0b1320; }
+    ::-webkit-scrollbar-thumb { background:#1e2d42; border-radius:3px; }
+    .badge { display:inline-flex; align-items:center; padding:2px 10px; border-radius:999px; font-size:11px; font-weight:700; }
+    .s-new            { background:#1e3a5f; color:#60a5fa; }
+    .s-call_initiated { background:#1a3a2a; color:#4ade80; }
+    .s-call_completed { background:#1a3a2a; color:#34d399; }
+    .s-call_missed    { background:#3b1a1a; color:#f87171; }
+    .s-booked         { background:#0d2535; color:#38bdf8; }
+    .s-won            { background:#14291a; color:#86efac; }
+    .s-closed         { background:#1f1f1f; color:#6b7280; }
+    .tab { padding:8px 16px; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer; transition:all .15s; color:#4b5563; }
+    .tab.active { background:#131f30; color:#fff; }
+    .tab:hover:not(.active) { color:#79849b; }
+    input,select,textarea { background:#0b1320; border:1px solid #1e2d42; color:#fff; border-radius:10px; padding:10px 14px; font-size:14px; outline:none; width:100%; transition:border-color .15s; }
+    input:focus,select:focus,textarea:focus { border-color:#fe6a2a; }
+    select option { background:#131f30; }
+    input::placeholder,textarea::placeholder { color:#2a3550; }
+    .tr:hover { background:#131f30; }
+    .fade { animation:fadeIn .2s ease; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
   </style>
 </head>
-<body class="min-h-screen text-white">
+<body class="min-h-screen">
 
-<!-- ── Login screen ─────────────────────────────────────────── -->
+<!-- LOGIN -->
 <div id="loginScreen" class="min-h-screen flex items-center justify-center px-4">
   <div class="w-full max-w-sm">
     <div class="flex items-center gap-3 mb-8 justify-center">
       <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#a83900,#fe6a2a)">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
       </div>
       <div>
-        <div class="font-black text-lg leading-none text-white">Lowcountry Air</div>
-        <div class="text-xs" style="color:#79849b">Admin Dashboard</div>
+        <div class="font-black text-lg leading-none">Lowcountry Air</div>
+        <div class="text-xs" style="color:#4b5563">Admin Dashboard</div>
       </div>
     </div>
     <div class="rounded-2xl p-6" style="background:#131f30;border:1px solid #1e2d42">
-      <h1 class="text-xl font-bold mb-6 text-center">Sign In</h1>
-      <input id="passwordInput" type="password" placeholder="Admin password"
-        class="w-full px-4 py-3 rounded-xl text-sm mb-4 outline-none focus:ring-2 focus:ring-orange-500"
-        style="background:#0b1320;border:1px solid #1e2d42;color:#fff;"
-        onkeydown="if(event.key==='Enter')login()" />
-      <div id="loginError" class="text-red-400 text-sm mb-3 hidden text-center">Incorrect password</div>
-      <button onclick="login()"
-        class="w-full py-3 rounded-xl font-bold text-white text-sm uppercase tracking-widest transition"
-        style="background:linear-gradient(135deg,#a83900,#fe6a2a)">
-        Enter Dashboard
-      </button>
+      <h1 class="text-lg font-black mb-5 text-center">Sign In</h1>
+      <input id="pwInput" type="password" placeholder="Admin password" class="mb-3" onkeydown="if(event.key==='Enter')login()" />
+      <div id="loginErr" class="hidden text-red-400 text-xs mb-3 text-center">Wrong password</div>
+      <button onclick="login()" class="w-full py-3 rounded-xl font-black text-sm uppercase tracking-widest text-white" style="background:linear-gradient(135deg,#a83900,#fe6a2a)">Enter</button>
     </div>
   </div>
 </div>
 
-<!-- ── Dashboard ────────────────────────────────────────────── -->
+<!-- DASHBOARD -->
 <div id="dashboard" class="hidden">
 
   <!-- Header -->
-  <header class="sticky top-0 z-50 px-4 sm:px-8 py-4 flex items-center justify-between" style="background:#0b1320;border-bottom:1px solid #1a2535">
-    <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#a83900,#fe6a2a)">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+  <header class="sticky top-0 z-40 px-4 sm:px-8 py-3 flex items-center justify-between gap-3" style="background:#0b1320;border-bottom:1px solid #1a2535">
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:linear-gradient(135deg,#a83900,#fe6a2a)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
       </div>
-      <span class="font-black text-sm sm:text-base">Lowcountry Air <span class="font-normal opacity-50">/ Admin</span></span>
+      <span class="font-black text-sm">Lowcountry Air <span class="opacity-30 font-normal">/ Admin</span></span>
     </div>
-    <div class="flex items-center gap-3">
-      <span id="lastUpdated" class="text-xs hidden sm:block" style="color:#4b5563"></span>
-      <button onclick="loadLeads()" class="text-xs px-3 py-1.5 rounded-lg font-semibold transition" style="background:#1a2535;color:#79849b">Refresh</button>
-      <button onclick="logout()" class="text-xs px-3 py-1.5 rounded-lg font-semibold" style="background:#3b1a1a;color:#f87171">Sign Out</button>
+    <div class="flex items-center gap-2">
+      <span id="lastUpdated" class="text-xs hidden sm:block" style="color:#2a3550"></span>
+      <button onclick="exportCSV()" class="text-xs px-3 py-1.5 rounded-lg font-bold" style="background:#131f30;color:#4b5563">Export CSV</button>
+      <button onclick="loadLeads()" class="text-xs px-3 py-1.5 rounded-lg font-bold" style="background:#131f30;color:#4b5563">Refresh</button>
+      <button onclick="logout()" class="text-xs px-3 py-1.5 rounded-lg font-bold" style="background:#3b1a1a;color:#f87171">Out</button>
     </div>
   </header>
 
-  <!-- Stats row -->
-  <div class="px-4 sm:px-8 pt-6 pb-2 grid grid-cols-2 sm:grid-cols-4 gap-3" id="statsRow"></div>
+  <!-- Stats -->
+  <div class="px-4 sm:px-8 pt-5 pb-3 grid grid-cols-3 sm:grid-cols-6 gap-2" id="statsRow"></div>
 
-  <!-- Filter row -->
-  <div class="px-4 sm:px-8 py-3 flex flex-wrap gap-2 items-center">
-    <input id="searchInput" type="text" placeholder="Search name, phone, service..."
-      class="flex-1 min-w-48 px-4 py-2 rounded-xl text-sm outline-none"
-      style="background:#131f30;border:1px solid #1e2d42;color:#fff;"
-      oninput="filterLeads()" />
-    <select id="statusFilter" onchange="filterLeads()"
-      class="px-4 py-2 rounded-xl text-sm outline-none"
-      style="background:#131f30;border:1px solid #1e2d42;color:#79849b;">
-      <option value="">All statuses</option>
-      <option value="new">New</option>
-      <option value="call_initiated">Call Initiated</option>
-      <option value="call_completed">Call Completed</option>
-      <option value="call_missed">Missed</option>
-      <option value="booked">Booked</option>
-    </select>
+  <!-- Tabs + Search -->
+  <div class="px-4 sm:px-8 pb-2 flex flex-col sm:flex-row gap-3">
+    <div class="flex gap-1 overflow-x-auto pb-1" id="tabBar">
+      <div class="tab active" data-tab="all"     onclick="setTab(this)">All</div>
+      <div class="tab"        data-tab="new"     onclick="setTab(this)">New</div>
+      <div class="tab"        data-tab="booked"  onclick="setTab(this)">Booked</div>
+      <div class="tab"        data-tab="called"  onclick="setTab(this)">Called</div>
+      <div class="tab"        data-tab="missed"  onclick="setTab(this)">Missed</div>
+      <div class="tab"        data-tab="won"     onclick="setTab(this)">Won</div>
+      <div class="tab"        data-tab="closed"  onclick="setTab(this)">Closed</div>
+    </div>
+    <input id="searchInput" type="text" placeholder="Search name, phone, address…" class="sm:w-64" oninput="filterLeads()" style="padding:8px 14px;font-size:13px" />
   </div>
 
-  <!-- Lead cards -->
-  <div class="px-4 sm:px-8 pb-12" id="leadsContainer">
-    <div class="text-center py-20 opacity-40 text-sm">Loading leads…</div>
-  </div>
+  <!-- Table (desktop) / Cards (mobile) -->
+  <div class="px-4 sm:px-8 pb-16">
 
+    <!-- Desktop table -->
+    <div class="hidden sm:block rounded-2xl overflow-hidden" style="border:1px solid #1a2535">
+      <table class="w-full text-sm" id="desktopTable">
+        <thead>
+          <tr style="background:#131f30;border-bottom:1px solid #1a2535">
+            <th class="text-left px-4 py-3 text-xs font-bold uppercase tracking-widest" style="color:#2a3550">Customer</th>
+            <th class="text-left px-4 py-3 text-xs font-bold uppercase tracking-widest" style="color:#2a3550">Service</th>
+            <th class="text-left px-4 py-3 text-xs font-bold uppercase tracking-widest" style="color:#2a3550">Status</th>
+            <th class="text-left px-4 py-3 text-xs font-bold uppercase tracking-widest" style="color:#2a3550">Booking</th>
+            <th class="text-left px-4 py-3 text-xs font-bold uppercase tracking-widest" style="color:#2a3550">Date</th>
+            <th class="px-4 py-3"></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div id="tableEmpty" class="hidden text-center py-16 text-sm" style="color:#2a3550">No leads found</div>
+    </div>
+
+    <!-- Mobile cards -->
+    <div class="sm:hidden" id="cardList"></div>
+
+  </div>
 </div>
 
-<!-- ── Lead detail modal ─────────────────────────────────────── -->
-<div id="modal" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" style="background:rgba(0,0,0,.7)">
-  <div id="modalContent" class="w-full sm:max-w-lg max-h-screen sm:max-h-[90vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl p-6 sm:p-8 fade-in" style="background:#131f30;border:1px solid #1e2d42">
+<!-- MODAL -->
+<div id="modal" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" style="background:rgba(0,0,0,.75)" onclick="if(event.target===this)closeModal()">
+  <div class="w-full sm:max-w-lg overflow-y-auto rounded-t-2xl sm:rounded-2xl p-5 sm:p-7 fade" style="background:#131f30;border:1px solid #1e2d42;max-height:92vh">
     <div id="modalBody"></div>
-    <button onclick="closeModal()" class="mt-6 w-full py-3 rounded-xl font-bold text-sm" style="background:#1a2535;color:#79849b">Close</button>
   </div>
 </div>
 
 <script>
 let allLeads = [];
 let adminKey = '';
+let activeTab = 'all';
+let modalLead = null;
 
-// ── Auth ────────────────────────────────────────────────────
+// ── Auth ─────────────────────────────────────────────────────
 function login() {
-  const pw = document.getElementById('passwordInput').value.trim();
+  const pw = document.getElementById('pwInput').value.trim();
   if (!pw) return;
   adminKey = pw;
   loadLeads();
 }
-
 function logout() {
-  adminKey = '';
-  allLeads = [];
+  adminKey = ''; allLeads = [];
   document.getElementById('dashboard').classList.add('hidden');
   document.getElementById('loginScreen').classList.remove('hidden');
-  document.getElementById('passwordInput').value = '';
-  document.getElementById('loginError').classList.add('hidden');
+  document.getElementById('pwInput').value = '';
 }
 
-// ── Data ────────────────────────────────────────────────────
+// ── Load ─────────────────────────────────────────────────────
 async function loadLeads() {
   try {
-    const r = await fetch('/api/admin-leads', {
-      headers: { 'x-admin-key': adminKey }
-    });
-
-    if (r.status === 401) {
-      document.getElementById('loginError').classList.remove('hidden');
-      return;
-    }
-
-    document.getElementById('loginError').classList.add('hidden');
+    const r = await fetch('/api/admin-leads', { headers:{'x-admin-key':adminKey} });
+    if (r.status === 401) { document.getElementById('loginErr').classList.remove('hidden'); return; }
+    document.getElementById('loginErr').classList.add('hidden');
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('dashboard').classList.remove('hidden');
-
     const { leads } = await r.json();
     allLeads = leads || [];
-
     renderStats();
     filterLeads();
-
     const el = document.getElementById('lastUpdated');
-    el.textContent = 'Updated ' + new Date().toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+    el.textContent = 'Updated ' + new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
     el.classList.remove('hidden');
-  } catch (err) {
-    console.error(err);
-  }
+  } catch(e) { console.error(e); }
 }
 
-// ── Stats ───────────────────────────────────────────────────
+// ── Stats ─────────────────────────────────────────────────────
 function renderStats() {
-  const total    = allLeads.length;
-  const booked   = allLeads.filter(l => l.status === 'booked').length;
-  const missed   = allLeads.filter(l => l.status === 'call_missed').length;
-  const newLeads = allLeads.filter(l => l.status === 'new').length;
-
-  document.getElementById('statsRow').innerHTML = `
-    ${stat('Total Leads', total, '#60a5fa')}
-    ${stat('Booked', booked, '#38bdf8')}
-    ${stat('New', newLeads, '#4ade80')}
-    ${stat('Missed', missed, '#f87171')}
-  `;
+  const total   = allLeads.length;
+  const newL    = allLeads.filter(l=>l.status==='new').length;
+  const booked  = allLeads.filter(l=>l.status==='booked').length;
+  const won     = allLeads.filter(l=>l.status==='won').length;
+  const missed  = allLeads.filter(l=>l.status==='call_missed').length;
+  const rate    = total ? Math.round((won/total)*100) : 0;
+  document.getElementById('statsRow').innerHTML = [
+    ['Total',    total,  '#60a5fa'],
+    ['New',      newL,   '#4ade80'],
+    ['Booked',   booked, '#38bdf8'],
+    ['Won',      won,    '#86efac'],
+    ['Missed',   missed, '#f87171'],
+    ['Close %',  rate+'%','#fbbf24'],
+  ].map(([l,v,c])=>`
+    <div class="rounded-xl p-3" style="background:#131f30;border:1px solid #1a2535">
+      <div class="text-xl font-black" style="color:${c}">${v}</div>
+      <div class="text-xs mt-0.5" style="color:#2a3550">${l}</div>
+    </div>`).join('');
 }
 
-function stat(label, value, color) {
-  return `
-    <div class="rounded-2xl p-4" style="background:#131f30;border:1px solid #1e2d42">
-      <div class="text-2xl font-black" style="color:${color}">${value}</div>
-      <div class="text-xs mt-1" style="color:#4b5563">${label}</div>
-    </div>
-  `;
+// ── Tabs ──────────────────────────────────────────────────────
+function setTab(el) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  activeTab = el.dataset.tab;
+  filterLeads();
 }
 
-// ── Filter + render ─────────────────────────────────────────
+// ── Filter ────────────────────────────────────────────────────
 function filterLeads() {
   const q  = document.getElementById('searchInput').value.toLowerCase();
-  const st = document.getElementById('statusFilter').value;
+  const tabMap = {
+    all:'', new:'new', booked:'booked',
+    called:'call_completed', missed:'call_missed', won:'won', closed:'closed'
+  };
+  const st = tabMap[activeTab] || '';
 
   const filtered = allLeads.filter(l => {
-    const matchQ  = !q || [l.name, l.phone, l.email, l.service, l.address, l.message]
-      .some(f => (f || '').toLowerCase().includes(q));
-    const matchSt = !st || l.status === st;
+    const matchQ  = !q || [l.name,l.phone,l.email,l.service,l.address,l.message]
+      .some(f=>(f||'').toLowerCase().includes(q));
+    const matchSt = !st || l.status===st;
     return matchQ && matchSt;
   });
 
-  renderLeads(filtered);
+  renderTable(filtered);
+  renderCards(filtered);
 }
 
-function renderLeads(leads) {
-  const container = document.getElementById('leadsContainer');
+// ── Desktop table ─────────────────────────────────────────────
+function renderTable(leads) {
+  const tbody = document.getElementById('tableBody');
+  const empty = document.getElementById('tableEmpty');
   if (!leads.length) {
-    container.innerHTML = '<div class="text-center py-20 opacity-30 text-sm">No leads found</div>';
-    return;
+    tbody.innerHTML=''; empty.classList.remove('hidden'); return;
   }
-
-  container.innerHTML = leads.map(lead => leadCard(lead)).join('');
+  empty.classList.add('hidden');
+  tbody.innerHTML = leads.map(l => {
+    const b    = badge(l.status);
+    const date = new Date(l.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    const time = new Date(l.created_at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    return `<tr class="tr border-t cursor-pointer fade" style="border-color:#1a2535" onclick='openModal(${esc(l)})'>
+      <td class="px-4 py-3">
+        <div class="font-semibold text-sm">${l.name||'—'}</div>
+        <div class="text-xs" style="color:#4b5563">${l.phone}</div>
+      </td>
+      <td class="px-4 py-3 text-sm" style="color:#79849b">${l.service||'—'}</td>
+      <td class="px-4 py-3"><span class="badge ${b.cls}">${b.label}</span></td>
+      <td class="px-4 py-3 text-xs" style="color:#38bdf8">${l.booking_time ? '📅 '+l.booking_time.substring(0,16) : '—'}</td>
+      <td class="px-4 py-3 text-xs" style="color:#2a3550">${date}<br>${time}</td>
+      <td class="px-4 py-3">
+        <div class="flex gap-2 justify-end">
+          <a href="tel:${l.phone}" onclick="event.stopPropagation()"
+            class="text-xs px-3 py-1.5 rounded-lg font-bold text-white hover:brightness-110"
+            style="background:linear-gradient(135deg,#a83900,#fe6a2a)">Call</a>
+          ${l.notes ? `<span class="text-xs px-2 py-1.5 rounded-lg" style="background:#1a2535;color:#4b5563" title="${l.notes.replace(/"/g,'&quot;')}">📝</span>` : ''}
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
 }
 
-function leadCard(l) {
-  const date    = new Date(l.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
-  const time    = new Date(l.created_at).toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
-  const badge   = statusBadge(l.status);
-  const initial = (l.name || '?')[0].toUpperCase();
-
-  return `
-    <div class="rounded-2xl p-4 sm:p-5 mb-3 cursor-pointer transition hover:brightness-110 fade-in"
-      style="background:#131f30;border:1px solid #1e2d42"
-      onclick='openModal(${JSON.stringify(l).replace(/'/g, "&#39;")})'>
+// ── Mobile cards ──────────────────────────────────────────────
+function renderCards(leads) {
+  const el = document.getElementById('cardList');
+  if (!leads.length) { el.innerHTML='<div class="text-center py-16 text-sm" style="color:#2a3550">No leads found</div>'; return; }
+  el.innerHTML = leads.map(l => {
+    const b    = badge(l.status);
+    const date = new Date(l.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    const time = new Date(l.created_at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    const init = (l.name||'?')[0].toUpperCase();
+    return `<div class="rounded-2xl p-4 mb-2.5 cursor-pointer fade" style="background:#131f30;border:1px solid #1a2535" onclick='openModal(${esc(l)})'>
       <div class="flex items-start gap-3">
-        <div class="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center font-black text-sm"
-          style="background:linear-gradient(135deg,#a83900,#fe6a2a)">${initial}</div>
+        <div class="w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center font-black text-sm" style="background:linear-gradient(135deg,#a83900,#fe6a2a)">${init}</div>
         <div class="flex-1 min-w-0">
-          <div class="flex items-center justify-between gap-2 flex-wrap">
-            <span class="font-bold text-sm">${l.name || '—'}</span>
-            <span class="text-xs px-2.5 py-1 rounded-full font-semibold ${badge.cls}">${badge.label}</span>
+          <div class="flex items-center justify-between gap-2">
+            <span class="font-bold text-sm">${l.name||'—'}</span>
+            <span class="badge ${b.cls}">${b.label}</span>
           </div>
-          <div class="flex flex-wrap gap-x-4 gap-y-1 mt-1.5 text-xs" style="color:#79849b">
-            <a href="tel:${l.phone}" onclick="event.stopPropagation()" class="hover:text-orange-400 font-medium">${l.phone}</a>
-            <span>${l.service || 'General inquiry'}</span>
-            ${l.address ? `<span class="hidden sm:inline">${l.address}</span>` : ''}
+          <div class="flex gap-3 mt-1 text-xs" style="color:#4b5563">
+            <a href="tel:${l.phone}" onclick="event.stopPropagation()" class="hover:text-orange-400">${l.phone}</a>
+            <span>${l.service||'—'}</span>
           </div>
-          ${l.booking_time ? `<div class="mt-2 text-xs px-2.5 py-1 rounded-lg inline-block" style="background:#0d2535;color:#38bdf8">📅 ${l.booking_time}</div>` : ''}
-          ${l.ai_response && !l.booking_time ? `<p class="mt-2 text-xs leading-relaxed line-clamp-2" style="color:#4b5563">${l.ai_response}</p>` : ''}
+          ${l.booking_time ? `<div class="mt-1.5 text-xs" style="color:#38bdf8">📅 ${l.booking_time.substring(0,16)}</div>` : ''}
+          ${l.notes ? `<div class="mt-1.5 text-xs italic" style="color:#2a3550">${l.notes.substring(0,60)}${l.notes.length>60?'…':''}</div>` : ''}
         </div>
       </div>
       <div class="flex items-center justify-between mt-3 pt-3" style="border-top:1px solid #1a2535">
         <span class="text-xs" style="color:#2a3550">${date} · ${time}</span>
-        <div class="flex gap-2">
-          <a href="tel:${l.phone}" onclick="event.stopPropagation()"
-            class="text-xs px-3 py-1.5 rounded-lg font-bold transition hover:brightness-110"
-            style="background:linear-gradient(135deg,#a83900,#fe6a2a);color:#fff">
-            Call Now
-          </a>
-          ${l.email ? `<a href="mailto:${l.email}" onclick="event.stopPropagation()"
-            class="text-xs px-3 py-1.5 rounded-lg font-bold transition"
-            style="background:#1a2535;color:#79849b">
-            Email
-          </a>` : ''}
-        </div>
+        <a href="tel:${l.phone}" onclick="event.stopPropagation()" class="text-xs px-3 py-1.5 rounded-lg font-bold text-white" style="background:linear-gradient(135deg,#a83900,#fe6a2a)">Call Now</a>
       </div>
-    </div>
-  `;
+    </div>`;
+  }).join('');
 }
 
-// ── Modal ───────────────────────────────────────────────────
+// ── Modal ─────────────────────────────────────────────────────
 function openModal(l) {
-  const badge = statusBadge(l.status);
-  const date  = new Date(l.created_at).toLocaleString('en-US', { timeZone:'America/New_York', month:'long', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' });
+  modalLead = l;
+  const b    = badge(l.status);
+  const date = new Date(l.created_at).toLocaleString('en-US',{timeZone:'America/New_York',month:'long',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
 
   document.getElementById('modalBody').innerHTML = `
-    <div class="flex items-start justify-between mb-6">
+    <div class="flex items-start justify-between mb-5">
       <div>
-        <h2 class="text-xl font-black">${l.name || '—'}</h2>
-        <div class="text-xs mt-1" style="color:#4b5563">${date}</div>
+        <h2 class="text-xl font-black">${l.name||'—'}</h2>
+        <div class="text-xs mt-0.5" style="color:#2a3550">${date}</div>
       </div>
-      <span class="text-xs px-2.5 py-1 rounded-full font-semibold ${badge.cls}">${badge.label}</span>
+      <button onclick="closeModal()" class="text-xl leading-none" style="color:#2a3550">✕</button>
     </div>
 
-    <div class="space-y-2 mb-6 text-sm">
-      ${row('Phone',   `<a href="tel:${l.phone}" class="font-bold hover:text-orange-400" style="color:#fe6a2a">${l.phone}</a>`)}
-      ${l.email   ? row('Email',   `<a href="mailto:${l.email}" class="hover:underline" style="color:#60a5fa">${l.email}</a>`) : ''}
+    <!-- Contact info -->
+    <div class="rounded-xl p-4 mb-4 space-y-2 text-sm" style="background:#0b1320;border:1px solid #1a2535">
+      ${row('Phone',   `<a href="tel:${l.phone}" class="font-bold" style="color:#fe6a2a">${l.phone}</a>`)}
+      ${l.email   ? row('Email',   `<a href="mailto:${l.email}" style="color:#60a5fa">${l.email}</a>`) : ''}
       ${l.service ? row('Service', l.service) : ''}
       ${l.address ? row('Address', l.address) : ''}
       ${l.system_type ? row('System', l.system_type) : ''}
-      ${l.message ? row('Message', `<em>${l.message}</em>`) : ''}
+      ${l.message ? row('Issue', `<em style="color:#c0cce0">${l.message}</em>`) : ''}
       ${l.booking_time ? row('Booking', `<span style="color:#38bdf8">📅 ${l.booking_time}</span>`) : ''}
     </div>
 
-    ${l.ai_response ? `
-      <div class="rounded-xl p-4 mb-6 text-sm leading-relaxed" style="background:#0b1320;border:1px solid #1a2535;color:#c0cce0">
-        <div class="text-xs font-bold uppercase tracking-widest mb-2" style="color:#2a3550">AI Summary / Response</div>
-        ${l.ai_response}
-      </div>
-    ` : ''}
+    <!-- AI Summary -->
+    ${l.ai_response ? `<div class="rounded-xl p-4 mb-4 text-sm leading-relaxed" style="background:#0b1320;border:1px solid #1a2535;color:#79849b">
+      <div class="text-xs font-bold uppercase tracking-widest mb-2" style="color:#2a3550">AI Summary</div>
+      ${l.ai_response}
+    </div>` : ''}
 
+    <!-- Status + Notes -->
+    <div class="rounded-xl p-4 mb-4" style="background:#0b1320;border:1px solid #1a2535">
+      <div class="text-xs font-bold uppercase tracking-widest mb-3" style="color:#2a3550">Update</div>
+      <div class="flex flex-col gap-3">
+        <div>
+          <label class="text-xs mb-1.5 block" style="color:#4b5563">Status</label>
+          <select id="modalStatus" style="font-size:13px;padding:8px 12px">
+            ${['new','call_initiated','call_completed','call_missed','booked','won','closed'].map(s =>
+              `<option value="${s}" ${l.status===s?'selected':''}>${statusLabel(s)}</option>`
+            ).join('')}
+          </select>
+        </div>
+        <div>
+          <label class="text-xs mb-1.5 block" style="color:#4b5563">Notes</label>
+          <textarea id="modalNotes" rows="3" placeholder="Add notes…" style="font-size:13px;resize:none">${l.notes||''}</textarea>
+        </div>
+        <button onclick="saveModal()" id="saveBtn"
+          class="w-full py-2.5 rounded-xl font-bold text-sm text-white"
+          style="background:#1e2d42">Save Changes</button>
+        <div id="saveMsg" class="hidden text-xs text-center" style="color:#4ade80">Saved ✓</div>
+      </div>
+    </div>
+
+    <!-- Actions -->
     <div class="flex gap-3">
-      <a href="tel:${l.phone}"
-        class="flex-1 py-3 rounded-xl font-black text-sm text-center text-white uppercase tracking-widest transition hover:brightness-110"
-        style="background:linear-gradient(135deg,#a83900,#fe6a2a)">
-        Call ${(l.name || '').split(' ')[0] || 'Customer'}
+      <a href="tel:${l.phone}" class="flex-1 py-3 rounded-xl font-black text-sm text-center text-white uppercase tracking-widest hover:brightness-110" style="background:linear-gradient(135deg,#a83900,#fe6a2a)">
+        Call ${(l.name||'').split(' ')[0]||'Customer'}
       </a>
-      ${l.email ? `<a href="mailto:${l.email}"
-        class="flex-1 py-3 rounded-xl font-bold text-sm text-center uppercase tracking-widest transition"
-        style="background:#1a2535;color:#79849b">
-        Email
-      </a>` : ''}
+      ${l.email ? `<a href="mailto:${l.email}" class="flex-1 py-3 rounded-xl font-bold text-sm text-center uppercase tracking-widest" style="background:#1a2535;color:#79849b">Email</a>` : ''}
     </div>
   `;
 
   document.getElementById('modal').classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
+  document.body.style.overflow='hidden';
+}
+
+async function saveModal() {
+  if (!modalLead) return;
+  const btn  = document.getElementById('saveBtn');
+  const status = document.getElementById('modalStatus').value;
+  const notes  = document.getElementById('modalNotes').value;
+  btn.textContent = 'Saving…'; btn.disabled = true;
+
+  try {
+    await fetch(`/api/admin-update?id=${modalLead.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type':'application/json', 'x-admin-key': adminKey },
+      body: JSON.stringify({ status, notes }),
+    });
+    // Update local data
+    const lead = allLeads.find(l => l.id === modalLead.id);
+    if (lead) { lead.status = status; lead.notes = notes; }
+    modalLead.status = status; modalLead.notes = notes;
+    document.getElementById('saveMsg').classList.remove('hidden');
+    btn.textContent = 'Save Changes'; btn.disabled = false;
+    renderStats();
+    filterLeads();
+    setTimeout(() => document.getElementById('saveMsg')?.classList.add('hidden'), 2000);
+  } catch {
+    btn.textContent = 'Save Changes'; btn.disabled = false;
+  }
 }
 
 function closeModal() {
   document.getElementById('modal').classList.add('hidden');
-  document.body.style.overflow = '';
+  document.body.style.overflow='';
+  modalLead = null;
 }
 
-document.getElementById('modal').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
-
-// ── Helpers ─────────────────────────────────────────────────
-function row(label, value) {
-  return `<div class="flex gap-3">
-    <span class="w-20 flex-shrink-0 text-xs pt-0.5" style="color:#4b5563">${label}</span>
-    <span class="font-medium leading-snug">${value}</span>
-  </div>`;
+// ── Export CSV ────────────────────────────────────────────────
+function exportCSV() {
+  const cols = ['created_at','name','phone','email','service','address','system_type','message','status','booking_time','notes'];
+  const header = cols.join(',');
+  const rows = allLeads.map(l => cols.map(c => `"${(l[c]||'').toString().replace(/"/g,'""')}"`).join(','));
+  const blob = new Blob([header+'\n'+rows.join('\n')], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `leads-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
 }
 
-function statusBadge(status) {
+// ── Helpers ───────────────────────────────────────────────────
+function badge(status) {
   const map = {
-    new:            { label: 'New',          cls: 'status-new' },
-    call_initiated: { label: 'Calling…',     cls: 'status-call_initiated' },
-    call_completed: { label: 'Called',       cls: 'status-call_completed' },
-    call_missed:    { label: 'Missed',       cls: 'status-call_missed' },
-    booked:         { label: 'Booked',       cls: 'status-booked' },
+    new:'New', call_initiated:'Calling…', call_completed:'Called',
+    call_missed:'Missed', booked:'Booked', won:'Won ✓', closed:'Closed'
   };
-  return map[status] || { label: status || 'Unknown', cls: 'status-new' };
+  return { label: map[status]||status||'—', cls: 's-'+(status||'new') };
+}
+function statusLabel(s) {
+  return {new:'New',call_initiated:'Calling…',call_completed:'Called',call_missed:'Missed',booked:'Booked',won:'Won',closed:'Closed'}[s]||s;
+}
+function row(label, value) {
+  return `<div class="flex gap-3"><span class="w-16 flex-shrink-0 text-xs pt-0.5" style="color:#2a3550">${label}</span><span class="font-medium leading-snug">${value}</span></div>`;
+}
+function esc(l) {
+  return JSON.stringify(l).replace(/'/g,"&#39;");
 }
 
-// ── Auto-refresh every 60 s while on dashboard ──────────────
+// ── Auto-refresh ──────────────────────────────────────────────
 setInterval(() => {
-  if (adminKey && !document.getElementById('dashboard').classList.contains('hidden')) {
-    loadLeads();
-  }
+  if (adminKey && !document.getElementById('dashboard').classList.contains('hidden')) loadLeads();
 }, 60000);
 
-// Focus password field on load
-document.getElementById('passwordInput').focus();
+document.getElementById('pwInput').focus();
 </script>
 </body>
 </html>
