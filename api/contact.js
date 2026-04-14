@@ -16,6 +16,7 @@ module.exports = async function handler(req, res) {
   const userContent = `Customer: ${name}, Phone: ${phone}, Email: ${email || 'not provided'}, Service: ${service || 'General inquiry'}, Address: ${address || 'not provided'}, System type: ${systemType || 'not specified'}, Message: "${message || 'no message'}". Write the personalized confirmation now.`;
 
   let confirmationMessage = `Thanks ${name}! We've received your service request and a technician will call you at ${phone} within 15 minutes to confirm your appointment.`;
+  let savedId = null;
 
   try {
     const aiResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -56,7 +57,7 @@ module.exports = async function handler(req, res) {
           'apikey': process.env.SUPABASE_ANON_KEY,
           'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
           'Content-Type': 'application/json',
-          'Prefer': 'return=minimal',
+          'Prefer': 'return=representation',
         },
         body: JSON.stringify({
           name,
@@ -72,7 +73,10 @@ module.exports = async function handler(req, res) {
       }
     );
 
-    if (!sbRes.ok) {
+    if (sbRes.ok) {
+      const rows = await sbRes.json();
+      savedId = rows?.[0]?.id || null;
+    } else {
       const err = await sbRes.text();
       console.error('Supabase insert error:', err);
     }
@@ -126,6 +130,7 @@ module.exports = async function handler(req, res) {
   return res.status(200).json({
     success: true,
     message: confirmationMessage,
+    leadId: savedId,
     submittedAt: new Date().toISOString(),
   });
 };

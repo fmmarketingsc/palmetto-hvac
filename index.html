@@ -972,11 +972,13 @@
   }, { passive: true });
 
   // ── Contact form → /api/contact ───────────────────────────
+  // Stores submitted lead data between steps
+  let pendingLead = null;
+
   async function handleSubmit(e) {
     e.preventDefault();
     const form = e.target;
     const btn  = form.querySelector('button[type="submit"]');
-    const inputs = form.querySelectorAll('input, select, textarea');
 
     btn.textContent = 'SENDING…';
     btn.disabled = true;
@@ -984,33 +986,31 @@
     const fields = form.querySelectorAll('input, select, textarea');
     const [nameEl, phoneEl, emailEl, serviceEl, addressEl, systemEl, messageEl] = fields;
 
+    pendingLead = {
+      name:       nameEl?.value,
+      phone:      phoneEl?.value,
+      email:      emailEl?.value,
+      service:    serviceEl?.value,
+      address:    addressEl?.value,
+      systemType: systemEl?.value,
+      message:    messageEl?.value,
+    };
+
     try {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name:       nameEl?.value,
-          phone:      phoneEl?.value,
-          email:      emailEl?.value,
-          service:    serviceEl?.value,
-          address:    addressEl?.value,
-          systemType: systemEl?.value,
-          message:    messageEl?.value,
-        }),
+        body: JSON.stringify(pendingLead),
       });
 
       const data = await res.json();
 
       if (res.ok && data.success) {
-        btn.textContent = '✓ REQUEST SENT!';
-        btn.classList.remove('kinetic-gradient');
-        btn.classList.add('bg-emerald-600');
+        pendingLead.leadId = data.leadId;
 
-        // Show AI-personalised confirmation below the button
-        const confirm = document.createElement('p');
-        confirm.className = 'mt-4 text-sm text-emerald-700 bg-emerald-50 rounded-xl p-4 leading-relaxed';
-        confirm.textContent = data.message;
-        btn.parentElement.appendChild(confirm);
+        // Hide form, show follow-up preference step
+        form.style.display = 'none';
+        showFollowUpStep(form.parentElement, data.message, pendingLead.name);
       } else {
         throw new Error(data.error || 'Unknown error');
       }
@@ -1021,6 +1021,98 @@
       btn.disabled = false;
       console.error('Contact form error:', err);
     }
+  }
+
+  function showFollowUpStep(container, aiMessage, name) {
+    const first = name?.split(' ')[0] || 'there';
+    const step = document.createElement('div');
+    step.id = 'followup-step';
+    step.innerHTML = `
+      <div class="text-center py-6">
+        <div class="w-14 h-14 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <span class="material-symbols-outlined text-emerald-600 text-3xl" style="font-variation-settings:'FILL' 1;">check_circle</span>
+        </div>
+        <h3 class="font-headline text-xl font-black uppercase tracking-tight mb-2">Got it, ${first}.</h3>
+        <p class="text-sm text-on-surface-variant mb-6 max-w-xs mx-auto">How do you want us to reach you?</p>
+        <div class="flex flex-col gap-3 max-w-xs mx-auto">
+          <button onclick="handleFollowUp('call')" class="w-full flex items-center justify-center gap-3 kinetic-gradient text-white py-4 rounded-xl font-black text-sm uppercase tracking-widest shadow-lg shadow-orange-600/20 active:scale-95 transition-transform">
+            <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">phone_in_talk</span>
+            Call Me Now
+          </button>
+          <button onclick="handleFollowUp('text')" class="w-full flex items-center justify-center gap-3 bg-primary-container text-white py-4 rounded-xl font-black text-sm uppercase tracking-widest active:scale-95 transition-transform">
+            <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">sms</span>
+            Text Me
+          </button>
+        </div>
+      </div>
+    `;
+    container.appendChild(step);
+  }
+
+  async function handleFollowUp(preference) {
+    const step = document.getElementById('followup-step');
+    const btns = step.querySelectorAll('button');
+    btns.forEach(b => b.disabled = true);
+
+    // Show loading on chosen button
+    const chosen = preference === 'call' ? btns[0] : btns[1];
+    const originalText = chosen.innerHTML;
+    chosen.innerHTML = `<span class="material-symbols-outlined animate-spin">progress_activity</span> &nbsp;Connecting…`;
+
+    try {
+      if (preference === 'call') {
+        // Trigger Bland.ai outbound call
+        const res = await fetch('/api/call', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(pendingLead),
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          showFinalMessage(step,
+            'phone_in_talk',
+            'bg-emerald-100',
+            'text-emerald-600',
+            "We're calling you now.",
+            `Expect a call from <strong>(843) 954-3943</strong> in about 60 seconds. It'll be quick — just a couple questions to get your estimate ready.`
+          );
+        } else {
+          throw new Error('Call failed');
+        }
+      } else {
+        // Text path — confirm and note coming soon or trigger SMS
+        const res = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...pendingLead, preferText: true }),
+        });
+
+        showFinalMessage(step,
+          'sms',
+          'bg-blue-100',
+          'text-blue-600',
+          "Text on its way!",
+          `We're texting <strong>${pendingLead.phone}</strong> now. Reply anytime and our AI will help get you a quote.`
+        );
+      }
+    } catch (err) {
+      chosen.innerHTML = originalText;
+      btns.forEach(b => b.disabled = false);
+      console.error('Follow-up error:', err);
+    }
+  }
+
+  function showFinalMessage(container, icon, bgClass, iconClass, title, body) {
+    container.innerHTML = `
+      <div class="text-center py-8">
+        <div class="w-16 h-16 ${bgClass} rounded-full flex items-center justify-center mx-auto mb-5">
+          <span class="material-symbols-outlined ${iconClass} text-4xl" style="font-variation-settings:'FILL' 1;">${icon}</span>
+        </div>
+        <h3 class="font-headline text-2xl font-black uppercase tracking-tight mb-3">${title}</h3>
+        <p class="text-sm text-on-surface-variant leading-relaxed max-w-sm mx-auto">${body}</p>
+      </div>
+    `;
   }
 
   // ── AI Chat → /api/chat ───────────────────────────────────
