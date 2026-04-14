@@ -8,6 +8,19 @@ module.exports = async function handler(req, res) {
   const { name, phone, service, address, systemType, message, leadId } = req.body || {};
   if (!phone) return res.status(400).json({ error: 'phone is required' });
 
+  // ── Fetch available slots from Cal.com (best-effort) ───────
+  let slotsText = 'I don\'t have the schedule pulled up right now, but I can have someone call you back to confirm a time.';
+  try {
+    const slotRes = await fetch('https://palmetto-hvac.vercel.app/api/availability');
+    if (slotRes.ok) {
+      const { slots } = await slotRes.json();
+      if (slots && slots.length > 0) {
+        const top = slots.slice(0, 4).map(s => s.display).join(', ');
+        slotsText = `Our next available times are: ${top}. Which of those works for you?`;
+      }
+    }
+  } catch (_) { /* use default */ }
+
   const task = `You are Madison from Lowcountry Air in Charleston, SC. Keep this call under 2 minutes — the customer is already stressed about their AC or heat.
 
 Be warm, calm, and get to the point fast. Here's all you need to do:
@@ -17,13 +30,15 @@ Be warm, calm, and get to the point fast. Here's all you need to do:
    - "What's the system doing — or not doing?"
    - "Roughly how old is the unit?"
 3. Give a quick honest ballpark estimate based on what they say.
-4. Ask if they want to book a tech — if yes, ask what time works.
-5. Confirm their address is ${address || 'on file'} and wrap up.
+4. Ask if they want to book a tech — if yes, say: "${slotsText}" Then ask which works.
+5. Once they pick a time, confirm: "Perfect, I've got you booked for [time]. Confirm your address is ${address || 'on file'}?"
+6. Wrap up warmly.
 
 Rules:
 - Never read from a script — sound human and natural
 - If it's an emergency (no AC, extreme heat, elderly or baby at home) offer same-day immediately
 - No upselling, no pressure
+- If they want to book, collect the chosen slot time and say you're locking it in
 - Voicemail if no answer: "Hey ${name?.split(' ')[0] || 'there'}, this is Madison from Lowcountry Air calling about your service request. Give us a call back at (843) 954-3943 whenever you're free."
 
 Customer: ${name}, Phone: ${phone}, System: ${systemType || 'unknown'}, Issue: "${message || service || 'not specified'}"`;
@@ -46,7 +61,7 @@ Customer: ${name}, Phone: ${phone}, System: ${systemType || 'unknown'}, Issue: "
         interruption_threshold: 150,
         temperature: 0.7,
         max_duration: 4,
-        webhook: `https://palmetto-hvac.vercel.app/api/call-complete`,
+        webhook: 'https://palmetto-hvac.vercel.app/api/call-complete',
         metadata: { leadId, name, phone, service },
         request_data: { leadId, name, service },
       }),

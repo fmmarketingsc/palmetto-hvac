@@ -19,8 +19,23 @@ module.exports = async function handler(req, res) {
 
   console.log('Call complete webhook:', { call_id, leadId, completed, call_length });
 
+  // ── Try to extract booked slot from transcript ─────────────
+  let bookedTime = null;
+  if (transcripts && Array.isArray(transcripts)) {
+    const fullText = transcripts.map(t => t.text || '').join(' ').toLowerCase();
+    // Look for phrases like "booked for Monday", "scheduled for Tuesday", etc.
+    const slotMatch = fullText.match(/(?:booked|scheduled|confirmed|locked in) (?:you )?(?:for|at) ([^.!?]{5,60})/i);
+    if (slotMatch) bookedTime = slotMatch[1].trim();
+  }
+
   // ── 1. Update lead in Supabase with call outcome ──────────
   if (leadId && process.env.SUPABASE_URL) {
+    const patch = {
+      status: completed ? (bookedTime ? 'booked' : 'call_completed') : 'call_missed',
+      ai_response: summary || null,
+    };
+    if (bookedTime) patch.booking_time = bookedTime;
+
     try {
       await fetch(`${process.env.SUPABASE_URL}/rest/v1/leads?id=eq.${leadId}`, {
         method: 'PATCH',
@@ -29,10 +44,7 @@ module.exports = async function handler(req, res) {
           'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          status: completed ? 'call_completed' : 'call_missed',
-          ai_response: summary || null,
-        }),
+        body: JSON.stringify(patch),
       });
     } catch (err) {
       console.error('Supabase update error:', err);
@@ -65,6 +77,7 @@ module.exports = async function handler(req, res) {
                   <tr><td style="padding:8px 0;color:#45474c">Service</td><td style="padding:8px 0;font-weight:700;color:#101c2e">${service || '—'}</td></tr>
                   <tr><td style="padding:8px 0;color:#45474c">Call Duration</td><td style="padding:8px 0;font-weight:700;color:#101c2e">${call_length ? Math.round(call_length) + ' seconds' : '—'}</td></tr>
                   <tr><td style="padding:8px 0;color:#45474c">Status</td><td style="padding:8px 0;font-weight:700;color:${completed ? '#16a34a' : '#dc2626'}">${completed ? '✅ Completed' : '❌ Missed / No Answer'}</td></tr>
+                  ${bookedTime ? `<tr><td style="padding:8px 0;color:#45474c">Booked For</td><td style="padding:8px 0;font-weight:700;color:#0ea5e9">📅 ${bookedTime}</td></tr>` : ''}
                 </table>
 
                 <div style="background:#fff;border:1px solid #e7eeff;border-radius:10px;padding:16px;margin-bottom:20px">
