@@ -127,6 +127,57 @@ module.exports = async function handler(req, res) {
     }
   }
 
+  // ── 4. Send confirmation email to customer ───────────────
+  if (process.env.RESEND_API_KEY && email && savedId) {
+    const editUrl = `https://palmetto-hvac.vercel.app/edit?id=${savedId}`;
+    try {
+      await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: 'Lowcountry Air <leads@resend.dev>',
+          to: email,
+          subject: `We got your request, ${name.split(' ')[0]}! ✅`,
+          html: `
+            <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0b1320;border-radius:16px;overflow:hidden">
+              <div style="padding:32px 24px;background:linear-gradient(135deg,#a83900,#fe6a2a);text-align:center">
+                <h1 style="margin:0;color:#fff;font-size:22px;font-weight:900;letter-spacing:-.02em">You're on our list, ${name.split(' ')[0]}!</h1>
+                <p style="margin:8px 0 0;color:rgba(255,255,255,.8);font-size:14px">Lowcountry Air — Charleston, SC</p>
+              </div>
+              <div style="padding:28px 24px">
+                <p style="color:#c0cce0;font-size:15px;line-height:1.6;margin:0 0 24px">${confirmationMessage}</p>
+
+                <div style="background:#131f30;border:1px solid #1e2d42;border-radius:12px;padding:20px;margin-bottom:24px">
+                  <p style="margin:0 0 12px;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#4b5563">Your Request</p>
+                  <table style="width:100%;border-collapse:collapse;font-size:13px">
+                    <tr><td style="padding:6px 0;color:#4b5563;width:100px">Name</td><td style="padding:6px 0;color:#c0cce0;font-weight:600">${name}</td></tr>
+                    <tr><td style="padding:6px 0;color:#4b5563">Phone</td><td style="padding:6px 0;color:#c0cce0;font-weight:600">${phone}</td></tr>
+                    ${service ? `<tr><td style="padding:6px 0;color:#4b5563">Service</td><td style="padding:6px 0;color:#c0cce0;font-weight:600">${service}</td></tr>` : ''}
+                    ${address ? `<tr><td style="padding:6px 0;color:#4b5563">Address</td><td style="padding:6px 0;color:#c0cce0;font-weight:600">${address}</td></tr>` : ''}
+                    ${systemType ? `<tr><td style="padding:6px 0;color:#4b5563">System</td><td style="padding:6px 0;color:#c0cce0;font-weight:600">${systemType}</td></tr>` : ''}
+                    ${message ? `<tr><td style="padding:6px 0;color:#4b5563;vertical-align:top">Issue</td><td style="padding:6px 0;color:#c0cce0">${message}</td></tr>` : ''}
+                  </table>
+                </div>
+
+                <div style="text-align:center;margin-bottom:24px">
+                  <p style="color:#4b5563;font-size:13px;margin:0 0 12px">Something wrong? Fix it before we call.</p>
+                  <a href="${editUrl}" style="display:inline-block;background:#131f30;border:2px solid #fe6a2a;color:#fe6a2a;padding:12px 28px;border-radius:10px;font-weight:900;font-size:13px;text-decoration:none;text-transform:uppercase;letter-spacing:.05em">Edit My Request</a>
+                </div>
+
+                <p style="color:#2a3550;font-size:12px;text-align:center;margin:0">Questions? Call us at <a href="tel:8439543943" style="color:#fe6a2a">(843) 954-3943</a></p>
+              </div>
+            </div>
+          `,
+        }),
+      });
+    } catch (err) {
+      console.error('Customer email error:', err);
+    }
+  }
+
   return res.status(200).json({
     success: true,
     message: confirmationMessage,

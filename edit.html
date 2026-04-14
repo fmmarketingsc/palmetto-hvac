@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Your Request — Lowcountry Air</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background: #0b1320; font-family: 'Inter', sans-serif; }
+    input, select, textarea {
+      background: #0b1320;
+      border: 1px solid #1e2d42;
+      color: #fff;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 16px;
+      width: 100%;
+      outline: none;
+      transition: border-color .2s;
+    }
+    input:focus, select:focus, textarea:focus { border-color: #fe6a2a; }
+    select option { background: #131f30; }
+    label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #4b5563; display: block; margin-bottom: 6px; }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center px-4 py-12">
+
+  <div class="w-full max-w-md">
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center gap-2 mb-4">
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#a83900,#fe6a2a)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </div>
+        <span class="font-black text-white">Lowcountry Air</span>
+      </div>
+      <h1 class="text-2xl font-black text-white mb-2">Edit Your Request</h1>
+      <p class="text-sm" style="color:#4b5563">Fix anything before our tech calls you.</p>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="text-center py-12 opacity-40 text-sm text-white">Loading your request…</div>
+
+    <!-- Error -->
+    <div id="errorState" class="hidden text-center py-12">
+      <p class="text-red-400 text-sm">Request not found or link expired.</p>
+      <a href="/" class="text-sm mt-4 inline-block" style="color:#fe6a2a">← Back to site</a>
+    </div>
+
+    <!-- Form -->
+    <div id="formWrap" class="hidden rounded-2xl p-6" style="background:#131f30;border:1px solid #1e2d42">
+      <div class="space-y-4">
+        <div>
+          <label>Your Name</label>
+          <input id="f-name" type="text" />
+        </div>
+        <div>
+          <label>Phone Number</label>
+          <input id="f-phone" type="tel" />
+        </div>
+        <div>
+          <label>Email</label>
+          <input id="f-email" type="email" />
+        </div>
+        <div>
+          <label>Service Needed</label>
+          <select id="f-service">
+            <option value="">Select service…</option>
+            <option>Emergency AC Repair</option>
+            <option>AC Repair</option>
+            <option>Heating Repair</option>
+            <option>AC Installation</option>
+            <option>Heating Installation</option>
+            <option>Maintenance / Tune-Up</option>
+            <option>Air Quality</option>
+            <option>General Inquiry</option>
+          </select>
+        </div>
+        <div>
+          <label>Address</label>
+          <input id="f-address" type="text" />
+        </div>
+        <div>
+          <label>System Type</label>
+          <select id="f-system">
+            <option value="">Select system…</option>
+            <option>Central Air</option>
+            <option>Mini Split</option>
+            <option>Heat Pump</option>
+            <option>Window Unit</option>
+            <option>Furnace</option>
+            <option>Not Sure</option>
+          </select>
+        </div>
+        <div>
+          <label>Describe the Issue</label>
+          <textarea id="f-message" rows="3" style="resize:none"></textarea>
+        </div>
+      </div>
+
+      <div id="formError" class="hidden mt-4 text-red-400 text-sm text-center"></div>
+
+      <button id="saveBtn" onclick="save()"
+        class="mt-6 w-full py-3.5 rounded-xl font-black text-white text-sm uppercase tracking-widest transition hover:brightness-110"
+        style="background:linear-gradient(135deg,#a83900,#fe6a2a)">
+        Save Changes
+      </button>
+      <a href="/" class="block text-center mt-4 text-xs" style="color:#2a3550">← Back to site</a>
+    </div>
+
+    <!-- Success -->
+    <div id="successState" class="hidden rounded-2xl p-8 text-center" style="background:#131f30;border:1px solid #1e2d42">
+      <div class="text-4xl mb-4">✅</div>
+      <h2 class="text-xl font-black text-white mb-2">Got it!</h2>
+      <p class="text-sm mb-6" style="color:#4b5563">Your request has been updated. We'll call you shortly.</p>
+      <a href="/" class="inline-block py-3 px-8 rounded-xl font-black text-white text-sm uppercase tracking-widest"
+        style="background:linear-gradient(135deg,#a83900,#fe6a2a)">Back to Site</a>
+    </div>
+
+  </div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const leadId = params.get('id');
+
+    async function load() {
+      if (!leadId) { show('errorState'); return; }
+      try {
+        const r = await fetch(`/api/update-lead?id=${leadId}`);
+        if (!r.ok) { show('errorState'); return; }
+        const { lead } = await r.json();
+
+        document.getElementById('f-name').value    = lead.name    || '';
+        document.getElementById('f-phone').value   = lead.phone   || '';
+        document.getElementById('f-email').value   = lead.email   || '';
+        document.getElementById('f-address').value = lead.address || '';
+        document.getElementById('f-message').value = lead.message || '';
+
+        // Set selects
+        setSelect('f-service', lead.service);
+        setSelect('f-system',  lead.system_type);
+
+        show('formWrap');
+      } catch {
+        show('errorState');
+      }
+    }
+
+    function setSelect(id, value) {
+      const sel = document.getElementById(id);
+      for (const opt of sel.options) {
+        if (opt.value === value || opt.text === value) { sel.value = opt.value; break; }
+      }
+    }
+
+    async function save() {
+      const btn = document.getElementById('saveBtn');
+      btn.textContent = 'Saving…';
+      btn.disabled = true;
+
+      const body = {
+        name:       document.getElementById('f-name').value.trim(),
+        phone:      document.getElementById('f-phone').value.trim(),
+        email:      document.getElementById('f-email').value.trim(),
+        service:    document.getElementById('f-service').value,
+        address:    document.getElementById('f-address').value.trim(),
+        systemType: document.getElementById('f-system').value,
+        message:    document.getElementById('f-message').value.trim(),
+      };
+
+      if (!body.name || !body.phone) {
+        document.getElementById('formError').textContent = 'Name and phone are required.';
+        document.getElementById('formError').classList.remove('hidden');
+        btn.textContent = 'Save Changes';
+        btn.disabled = false;
+        return;
+      }
+
+      try {
+        const r = await fetch(`/api/update-lead?id=${leadId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        if (r.ok) {
+          show('successState');
+        } else {
+          throw new Error();
+        }
+      } catch {
+        document.getElementById('formError').textContent = 'Something went wrong. Please try again.';
+        document.getElementById('formError').classList.remove('hidden');
+        btn.textContent = 'Save Changes';
+        btn.disabled = false;
+      }
+    }
+
+    function show(id) {
+      ['loading','errorState','formWrap','successState'].forEach(s => {
+        document.getElementById(s).classList.toggle('hidden', s !== id);
+      });
+    }
+
+    load();
+  </script>
+</body>
+</html>
