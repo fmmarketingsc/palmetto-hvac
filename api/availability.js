@@ -21,7 +21,8 @@ module.exports = async function handler(req, res) {
   const endTime   = end.toISOString();
 
   try {
-    const url = `https://api.cal.com/v2/slots/available?eventTypeId=${EVENT_TYPE_ID}&start=${encodeURIComponent(startTime)}&end=${encodeURIComponent(endTime)}&timeZone=America/New_York`;
+    // v2 uses /v2/slots (not /v2/slots/available), slot key is "start" not "time"
+    const url = `https://api.cal.com/v2/slots?eventTypeId=${EVENT_TYPE_ID}&start=${encodeURIComponent(startTime)}&end=${encodeURIComponent(endTime)}&timeZone=America/New_York`;
 
     const response = await fetch(url, {
       headers: {
@@ -37,18 +38,18 @@ module.exports = async function handler(req, res) {
     }
 
     const data = await response.json();
-    // v2 response: { status: 'success', data: { slots: { "2025-01-15": [{time:"..."},...] } } }
-    const slots = data?.data?.slots || {};
+    // v2 response: { status: 'success', data: { "2026-04-15": [{start:"..."},...] } }
+    const slots = data?.data || {};
 
     // Flatten into a readable list (up to 6 slots) for voice
     const readable = [];
     for (const [, times] of Object.entries(slots)) {
       for (const slot of times) {
         if (readable.length >= 6) break;
-        const d   = new Date(slot.time);
+        const d   = new Date(slot.start);
         const day = d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', timeZone: 'America/New_York' });
         const t   = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York' });
-        readable.push({ iso: slot.time, display: `${day} at ${t}` });
+        readable.push({ iso: slot.start, display: `${day} at ${t}` });
       }
       if (readable.length >= 6) break;
     }
