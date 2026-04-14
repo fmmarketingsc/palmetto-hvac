@@ -18,29 +18,35 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const response = await fetch(`https://api.cal.com/v1/bookings?apiKey=${CAL_API_KEY}`, {
+    const response = await fetch('https://api.cal.com/v2/bookings', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Authorization': `Bearer ${CAL_API_KEY}`,
+        'Content-Type': 'application/json',
+        'cal-api-version': '2024-08-13',
+      },
       body: JSON.stringify({
         eventTypeId: parseInt(EVENT_TYPE_ID, 10),
         start: slotTime,
-        timeZone: 'America/New_York',
-        language: 'en',
-        responses: {
+        attendee: {
           name,
           email: email || 'noemail@lowcountryair.com',
-          phone: phone || '',
+          timeZone: 'America/New_York',
+          language: 'en',
         },
-        metadata: { leadId, service },
+        meetingUrl: phone || '',
+        metadata: { leadId, service, phone },
       }),
     });
 
     const data = await response.json();
 
-    if (!response.ok) {
+    if (!response.ok || data.status === 'error') {
       console.error('Cal.com booking error:', data);
       return res.status(502).json({ error: 'Booking failed', details: data });
     }
+
+    const booking = data?.data || data;
 
     // Update lead in Supabase with booking info
     if (leadId && process.env.SUPABASE_URL) {
@@ -54,15 +60,15 @@ module.exports = async function handler(req, res) {
         body: JSON.stringify({
           status: 'booked',
           booking_time: slotTime,
-          booking_id: data.uid || data.id?.toString() || null,
+          booking_id: booking.uid || booking.id?.toString() || null,
         }),
       }).catch(console.error);
     }
 
     return res.status(200).json({
       success: true,
-      bookingId: data.uid || data.id,
-      start: data.startTime || slotTime,
+      bookingId: booking.uid || booking.id,
+      start: booking.start || slotTime,
     });
   } catch (err) {
     console.error('Book handler error:', err);
