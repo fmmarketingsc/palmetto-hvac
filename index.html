@@ -832,6 +832,131 @@
   </div>
 </section>
 
+<!-- ═══════════════════════════════════════════ FINANCING CALCULATOR ═══ -->
+<section class="py-24 bg-slate-950" id="financing">
+  <div class="max-w-5xl mx-auto px-4 sm:px-8">
+
+    <!-- Heading -->
+    <div class="text-center mb-12">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4" style="background:#131f30;color:#fe6a2a;border:1px solid #a83900">
+        Flexible Financing
+      </div>
+      <h2 class="text-3xl sm:text-4xl font-black text-white mb-3" style="font-family:'Epilogue',sans-serif">How Much Will It Cost<br class="hidden sm:block"/> Per Month?</h2>
+      <p class="text-sm sm:text-base max-w-lg mx-auto" style="color:#79849b">Get an instant payment estimate. No hard credit check, no commitment.</p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 gap-6 items-start">
+
+      <!-- Left: controls -->
+      <div class="rounded-2xl p-6 sm:p-8" style="background:#131f30;border:1px solid #1e2d42">
+
+        <!-- System selector -->
+        <div class="mb-6">
+          <label class="block text-xs font-bold uppercase tracking-widest mb-3" style="color:#4b5563">What do you need?</label>
+          <div class="grid grid-cols-2 gap-2" id="systemBtns">
+            <button class="sys-btn active rounded-xl py-3 px-3 text-sm font-bold text-left transition" data-cost="4500" onclick="selectSystem(this)">
+              <div class="text-base mb-0.5">❄️</div>AC Replacement<div class="text-xs font-normal mt-0.5" style="color:#79849b">Avg $3,500–$6,500</div>
+            </button>
+            <button class="sys-btn rounded-xl py-3 px-3 text-sm font-bold text-left transition" data-cost="5500" onclick="selectSystem(this)">
+              <div class="text-base mb-0.5">🌡️</div>Heat Pump<div class="text-xs font-normal mt-0.5" style="color:#79849b">Avg $4,000–$8,000</div>
+            </button>
+            <button class="sys-btn rounded-xl py-3 px-3 text-sm font-bold text-left transition" data-cost="3000" onclick="selectSystem(this)">
+              <div class="text-base mb-0.5">💨</div>Mini Split<div class="text-xs font-normal mt-0.5" style="color:#79849b">Avg $2,000–$5,000</div>
+            </button>
+            <button class="sys-btn rounded-xl py-3 px-3 text-sm font-bold text-left transition" data-cost="2000" onclick="selectSystem(this)">
+              <div class="text-base mb-0.5">🔧</div>Major Repair<div class="text-xs font-normal mt-0.5" style="color:#79849b">Avg $800–$3,500</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Cost slider -->
+        <div class="mb-6">
+          <div class="flex items-center justify-between mb-2">
+            <label class="text-xs font-bold uppercase tracking-widest" style="color:#4b5563">Estimated Cost</label>
+            <span id="costDisplay" class="text-lg font-black" style="color:#fe6a2a">$4,500</span>
+          </div>
+          <input type="range" id="costSlider" min="500" max="15000" step="250" value="4500"
+            oninput="updateCalc()"
+            class="w-full h-2 rounded-full appearance-none cursor-pointer"
+            style="accent-color:#fe6a2a;background:#1e2d42" />
+          <div class="flex justify-between text-xs mt-1" style="color:#2a3550">
+            <span>$500</span><span>$15,000</span>
+          </div>
+        </div>
+
+        <!-- Term selector -->
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-widest mb-3" style="color:#4b5563">Financing Term</label>
+          <div class="grid grid-cols-4 gap-2" id="termBtns">
+            <button class="term-btn rounded-xl py-2.5 text-sm font-bold transition" data-months="12" data-rate="0" onclick="selectTerm(this)">
+              12 mo<div class="text-xs font-normal" style="color:#4ade80">0% APR</div>
+            </button>
+            <button class="term-btn active rounded-xl py-2.5 text-sm font-bold transition" data-months="24" data-rate="9.99" onclick="selectTerm(this)">
+              24 mo<div class="text-xs font-normal" style="color:#79849b">9.99%</div>
+            </button>
+            <button class="term-btn rounded-xl py-2.5 text-sm font-bold transition" data-months="36" data-rate="11.99" onclick="selectTerm(this)">
+              36 mo<div class="text-xs font-normal" style="color:#79849b">11.99%</div>
+            </button>
+            <button class="term-btn rounded-xl py-2.5 text-sm font-bold transition" data-months="60" data-rate="14.99" onclick="selectTerm(this)">
+              60 mo<div class="text-xs font-normal" style="color:#79849b">14.99%</div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: result -->
+      <div class="flex flex-col gap-4">
+
+        <!-- Monthly payment hero -->
+        <div class="rounded-2xl p-6 sm:p-8 text-center" style="background:linear-gradient(135deg,#a83900,#fe6a2a)">
+          <div class="text-sm font-bold uppercase tracking-widest mb-1 text-white opacity-80">Est. Monthly Payment</div>
+          <div id="monthlyPayment" class="text-6xl font-black text-white my-3">$199</div>
+          <div id="termLabel" class="text-sm text-white opacity-70">for 24 months at 9.99% APR</div>
+        </div>
+
+        <!-- Breakdown -->
+        <div class="rounded-2xl p-5" style="background:#131f30;border:1px solid #1e2d42">
+          <div class="space-y-3 text-sm">
+            <div class="flex justify-between">
+              <span style="color:#4b5563">Equipment + Install</span>
+              <span id="bCost" class="font-bold">$4,500</span>
+            </div>
+            <div class="flex justify-between">
+              <span style="color:#4b5563">Total Interest</span>
+              <span id="bInterest" class="font-bold" style="color:#fbbf24">$497</span>
+            </div>
+            <div class="flex justify-between pt-3" style="border-top:1px solid #1a2535">
+              <span style="color:#4b5563">Total Cost</span>
+              <span id="bTotal" class="font-black text-white">$4,997</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Promo callout -->
+        <div id="promoCallout" class="hidden rounded-xl p-4 text-sm" style="background:#0d2a10;border:1px solid #166534;color:#4ade80">
+          🎉 <strong>0% interest</strong> — pay nothing extra if paid in full within 12 months.
+        </div>
+
+        <!-- CTA -->
+        <a href="#contact"
+          class="block w-full py-4 rounded-2xl font-black text-white text-center uppercase tracking-widest text-sm transition hover:brightness-110"
+          style="background:linear-gradient(135deg,#a83900,#fe6a2a)">
+          Apply for Financing →
+        </a>
+        <p class="text-xs text-center" style="color:#2a3550">Rates shown are estimates. Final terms set by lender. No hard credit pull to apply.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<style>
+  .sys-btn { background:#0b1320; border:1px solid #1e2d42; color:#79849b; }
+  .sys-btn.active { border-color:#fe6a2a; color:#fff; background:#1a1a2e; }
+  .term-btn { background:#0b1320; border:1px solid #1e2d42; color:#79849b; }
+  .term-btn.active { border-color:#fe6a2a; color:#fff; }
+</style>
+
 <!-- ═══════════════════════════════════════════ SERVICE AREA MAP ═══ -->
 <section class="bg-primary-container py-16" id="service-area">
   <div class="max-w-7xl mx-auto px-6">
@@ -1292,6 +1417,63 @@
       typing.classList.add('hidden');
     }
   }
+</script>
+
+<!-- ═══════════════════════════════════════════ FINANCING CALC SCRIPT ═══ -->
+<script>
+  let calcCost  = 4500;
+  let calcMonths = 24;
+  let calcRate   = 9.99;
+
+  function selectSystem(btn) {
+    document.querySelectorAll('.sys-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    calcCost = parseInt(btn.dataset.cost);
+    document.getElementById('costSlider').value = calcCost;
+    updateCalc();
+  }
+
+  function selectTerm(btn) {
+    document.querySelectorAll('.term-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    calcMonths = parseInt(btn.dataset.months);
+    calcRate   = parseFloat(btn.dataset.rate);
+    updateCalc();
+  }
+
+  function updateCalc() {
+    calcCost = parseInt(document.getElementById('costSlider').value);
+    document.getElementById('costDisplay').textContent = '$' + calcCost.toLocaleString();
+
+    // Update system buttons to show nearest match
+    document.querySelectorAll('.sys-btn').forEach(b => {
+      b.classList.remove('active');
+    });
+
+    let monthly, totalInterest, totalCost;
+
+    if (calcRate === 0) {
+      monthly       = calcCost / calcMonths;
+      totalInterest = 0;
+      totalCost     = calcCost;
+      document.getElementById('promoCallout').classList.remove('hidden');
+    } else {
+      document.getElementById('promoCallout').classList.add('hidden');
+      const r = (calcRate / 100) / 12;
+      monthly = calcCost * (r * Math.pow(1 + r, calcMonths)) / (Math.pow(1 + r, calcMonths) - 1);
+      totalCost     = monthly * calcMonths;
+      totalInterest = totalCost - calcCost;
+    }
+
+    document.getElementById('monthlyPayment').textContent = '$' + Math.round(monthly).toLocaleString();
+    document.getElementById('termLabel').textContent      = `for ${calcMonths} months` + (calcRate > 0 ? ` at ${calcRate}% APR` : ' — 0% interest');
+    document.getElementById('bCost').textContent          = '$' + calcCost.toLocaleString();
+    document.getElementById('bInterest').textContent      = '$' + Math.round(totalInterest).toLocaleString();
+    document.getElementById('bTotal').textContent         = '$' + Math.round(totalCost).toLocaleString();
+  }
+
+  // Init
+  updateCalc();
 </script>
 </body>
 </html>
