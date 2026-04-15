@@ -290,7 +290,7 @@
           GET A FREE QUOTE
         </a>
         <a href="tel:8435550123" class="border-2 border-white/30 text-white hover:bg-white/10 px-8 py-4 rounded-xl font-black text-lg uppercase tracking-wider text-center transition-all">
-          CALL (843) 555-0123
+          CALL (843) 954-3943
         </a>
       </div>
 
@@ -522,7 +522,7 @@
           </div>
           <div class="space-y-1">
             <label class="text-[10px] font-black uppercase tracking-widest text-slate-500 px-1">Phone Number</label>
-            <input class="w-full bg-surface-container-lowest border border-transparent focus:border-secondary-container focus:ring-2 focus:ring-secondary-container/20 rounded-xl py-4 px-5 text-sm transition-all outline-none" placeholder="(843) 555-0123" type="tel" required/>
+            <input class="w-full bg-surface-container-lowest border border-transparent focus:border-secondary-container focus:ring-2 focus:ring-secondary-container/20 rounded-xl py-4 px-5 text-sm transition-all outline-none" placeholder="(843) 954-3943" type="tel" required/>
           </div>
           <div class="space-y-1">
             <label class="text-[10px] font-black uppercase tracking-widest text-slate-500 px-1">Email Address</label>
@@ -1039,7 +1039,7 @@
 <div id="mobile-cta" class="md:hidden fixed bottom-0 left-0 w-full z-50 px-4 pt-3 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent">
   <a href="tel:8435550123" class="w-full kinetic-gradient text-white h-16 rounded-2xl font-black uppercase tracking-[0.2em] text-sm shadow-[0_12px_40px_rgba(168,57,0,0.4)] flex items-center justify-center gap-3 active:scale-95 transition-transform">
     <span class="material-symbols-outlined">phone_in_talk</span>
-    Call Now: (843) 555-0123
+    Call Now: (843) 954-3943
   </a>
 </div>
 
@@ -1408,11 +1408,11 @@
       });
 
       const data = await res.json();
-      const reply = data.reply || "Sorry, I'm having trouble right now. Please call (843) 555-0123.";
+      const reply = data.reply || "Sorry, I'm having trouble right now. Please call (843) 954-3943.";
       chatHistory.push({ role: 'assistant', content: reply });
       appendMessage(reply, false);
     } catch (err) {
-      appendMessage("Connection error. Please call us at (843) 555-0123 — we're available 24/7.", false);
+      appendMessage("Connection error. Please call us at (843) 954-3943 — we're available 24/7.", false);
     } finally {
       typing.classList.add('hidden');
     }
